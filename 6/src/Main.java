@@ -1,3 +1,13 @@
+import java.awt.*;
+import java.io.IOException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 import java.io.*;
 import java.util.*;
 
@@ -39,14 +49,63 @@ class Line
     }
 }
 
+
+
 public class Main {
 
     public static void main(String[] args) {
         TreeMap<Integer, Line> map = new TreeMap<>();
         ArrayList<Line> Lines = new ArrayList<Line>();
+        ArrayList<Integer> dots = new ArrayList<Integer>();
         Integer x1, y1, x2, y2;
-        int i = 0;
-        try(FileReader reader = new FileReader("file.txt"))
+        int k = 1;
+        int a = 0;
+
+        try {
+            DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document document = documentBuilder.parse("input.xml");
+
+            Node root = document.getDocumentElement().getFirstChild();
+            Node line = root.getNextSibling();
+            while(line != null)
+            {
+                String str = line.getTextContent();
+                String regex = "[^\\d]";
+
+                String[] reg = str.split(regex);
+
+                for(String word : reg){
+                    try {
+                        Integer rez = Integer.valueOf(word);
+                        dots.add(rez);
+                    } catch (NumberFormatException e) {
+                    }
+                }
+                for(Integer dot: dots)
+                {
+                    System.out.println(dot);
+                }
+                map.put(k, new Line(dots.get(0), dots.get(1), dots.get(2), dots.get(3)));
+                dots.clear();
+                line = line.getNextSibling().getNextSibling();
+                k++;
+            }
+            for(int i = 1; i < map.size(); i++) {
+                for (int j = 2; j <= map.size(); j++) {
+                    map.get(i).Sol(map.get(i), map.get(j));
+                }
+            }
+        } catch (ParserConfigurationException ex) {
+            ex.printStackTrace(System.out);
+        } catch (SAXException ex) {
+            ex.printStackTrace(System.out);
+        } catch (IOException ex) {
+            ex.printStackTrace(System.out);
+        }
+    }
+
+//работа с текстовым файлом
+        /*try(FileReader reader = new FileReader("file.txt"))
         {
             Scanner scan = new Scanner(reader);
             while(scan.hasNextLine())
@@ -63,7 +122,9 @@ public class Main {
         catch(IOException ex)
         {
             System.out.println(ex.getMessage());
-        }
+        }*/
+
+        //array comment
         /*for(int k = 0; k < Lines.size() - 1; k++)
         {
             for(int m = k + 1; m < Lines.size(); m++)
@@ -71,12 +132,4 @@ public class Main {
                 Lines.get(k).Sol(Lines.get(k), Lines.get(m));
             }
         }*/
-        for(int k = 1; k < map.size(); k++)
-        {
-            for(int m = k + 1; m <= map.size(); m++)
-            {
-                map.get(k).Sol(map.get(k), map.get(m));
-            }
-        }
-    }
 }
